@@ -19,6 +19,7 @@ def run(config, seed):
     h = config['h']
     epsilon = config['epsilon']
     eta = config['eta']
+    noise_magnitude = config['noise_magnitude']
     run_tt_limit = config['run_tt_limit']
     plot_iterates = config['plot_iterates']
 
@@ -83,8 +84,10 @@ def run(config, seed):
                                 file_prefix='plot_with_limit_{}'.format(legend['name']))
             print('Percentage done: {0:.1f}%'.format(100 * step / nb_steps))
         
-        grads_a = sgd_learner.stoch_grad_a_loss(target)
-        grads_u = sgd_learner.stoch_grad_u_loss(target)
+        x = np.random.rand()
+        noise = noise_magnitude * (2 * np.random.rand() - 1)
+        grads_a = sgd_learner.stoch_grad_a_loss(target, x, noise)
+        grads_u = sgd_learner.stoch_grad_u_loss(target, x, noise)
         sgd_learner.a -= h * grads_a
         sgd_learner.u -= h * epsilon * grads_u
 

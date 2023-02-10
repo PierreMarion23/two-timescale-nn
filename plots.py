@@ -84,7 +84,7 @@ def plot_losses(nb_steps, losses_lists, labels, ylim, show=False, save=False, fo
         plt.xlabel(r'$p$')
     elif len(losses_lists) == 2:
         plt.xlabel(r'$p = \tau / \varepsilon h$')
-    plt.ylabel(r'$L$')
+    plt.ylabel(r'$L_2$ error')
     plt.legend(loc='upper right')
     if show:
         plt.show()

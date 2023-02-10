@@ -29,14 +29,16 @@ class NeuralNetwork:
         return result
     
 
-    def stoch_grad_a_loss(self, teacher):
+    def stoch_grad_a_loss(self, teacher, x=None, noise=0):
         """Evaluates the gradient of the loss at point x wrt a."""
-        x = np.random.rand()
-        return - 2 * (teacher(x) - self(x)) * self.sigma(x - self.u)
+        if x is None:
+            x = np.random.rand()
+        return - 2 * (teacher(x) + noise - self(x)) * self.sigma(x - self.u)
     
 
-    def stoch_grad_u_loss(self, teacher):
+    def stoch_grad_u_loss(self, teacher, x=None, noise=0):
         """Evaluates the gradient of the loss at point x wrt u."""
-        x = np.random.rand()
+        if x is None:
+            x = np.random.rand()
         indicator = np.all([x >= self.u - self.eta/2, x <= self.u + self.eta/2], axis=0)
-        return 2 * (teacher(x) - self(x)) * self.a * indicator / self.eta
+        return 2 * (teacher(x) + noise - self(x)) * self.a * indicator / self.eta
