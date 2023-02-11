@@ -33,8 +33,8 @@ def run(config, seed):
 
     # Initial subdivision for learners.
     subdivision = np.sort(np.random.rand(nb_neurons))
-    sgd_learner = NeuralNetwork(np.zeros(nb_neurons), subdivision, eta)
-    limit_learner = NeuralNetwork(np.zeros(nb_neurons), subdivision, eta)
+    sgd_learner = NeuralNetwork(np.zeros(nb_neurons+1), subdivision, eta)
+    limit_learner = NeuralNetwork(np.zeros(nb_neurons+1), subdivision, eta)
 
     nb_steps = int(tmax / (h * epsilon))
     print('Number of steps: {}'.format(nb_steps))
@@ -62,7 +62,7 @@ def run(config, seed):
                         xs=xs, 
                         ys=ys, 
                         labels=labels,
-                        ylim=[min(ys[0])-0.2, max(ys[0])+0.2],
+                        ylim=[min(0, min(ys[0]))-0.2, max(0, max(ys[0]))+0.2],  # this includes y=0 in the plot.
                         neuron_positions=neuron_positions,
                         legend=legend,
                         save=True,
@@ -77,7 +77,7 @@ def run(config, seed):
                                 xs=xs, 
                                 ys=ys, 
                                 labels=labels,
-                                ylim=[min(ys[0])-0.2, max(ys[0])+0.2],
+                                ylim=[min(0, min(ys[0]))-0.2, max(0, max(ys[0]))+0.2], # this includes y=0 in the plot.
                                 legend=legend,
                                 save=True,
                                 folderpath=folderpath,
@@ -93,7 +93,7 @@ def run(config, seed):
 
         if run_tt_limit and step % interval_limit_integration == 0:
             derivatives, distance_to_kink = two_timescale_limit.two_timescale_limit_derivative(limit_learner, target)
-            for i in range(len(subdivision)):
+            for i in range(len(limit_learner.u)):
                 if np.abs(distance_to_kink[i]) < np.abs(limit_integration_stepsize * derivatives[i]):
                     # if the step is greater than the distance to the kink: jump to the kink.
                     # this is a decent (first order) approximation to discontinuous dynamics.

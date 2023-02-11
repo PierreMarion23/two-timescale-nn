@@ -5,8 +5,12 @@ import scipy.integrate as integ
 class NeuralNetwork:
 
     def __init__(self, a, u, eta):
+        if len(a) != len(u) + 1:
+            raise ValueError('there should be one more weight than position to account for the bias.')
         self.a = np.copy(a)
-        self.u = np.copy(u)
+        self.u = np.zeros(len(self.a))
+        self.u[0] = - eta / 2   # the bias is implemented as a neuron at position -eta/2.
+        self.u[1:] = np.copy(u)
         self.eta = eta
         self.sigma = lambda x: np.minimum(np.maximum((x + self.eta/2) / self.eta, 0), 1)
         self.X = np.linspace(0, 1, 1000)   # for plots
