@@ -2,6 +2,10 @@ import numpy as np
 import scipy.integrate as integ
 
 
+def sigma(x):
+    return np.minimum(np.maximum((4*(x+0.5)**3), 0), 0.5) + np.minimum(np.maximum((0.5 - 4*(0.5-x)**3), 0), 0.5)
+
+
 class NeuralNetwork:
 
     def __init__(self, a, u, eta):
@@ -11,8 +15,10 @@ class NeuralNetwork:
         self.u = np.zeros(len(self.a))
         self.u[0] = - eta / 2   # the bias is implemented as a neuron at position -eta/2.
         self.u[1:] = np.copy(u)
+        if list(self.u) != list(np.sort(self.u)):
+            raise ValueError('the neuron positions should be sorted.')
         self.eta = eta
-        self.sigma = lambda x: np.minimum(np.maximum((x + self.eta/2) / self.eta, 0), 1)
+        self.sigma = lambda x: sigma(x / self.eta)
         self.X = np.linspace(0, 1, 1000)   # for plots
 
 
