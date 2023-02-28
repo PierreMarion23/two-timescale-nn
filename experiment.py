@@ -1,3 +1,6 @@
+import copy
+import os
+import pickle
 import time
 
 import numpy as np
@@ -7,11 +10,13 @@ from neural_network import NeuralNetwork
 import plots
 
 
-def run(config, seed):
+def run(config, seed=None):
     start_time = time.time()
     print('Beginning experiment {}'.format(config['name']))
 
     folderpath = config['folderpath']
+    if folderpath and not os.path.exists(folderpath):
+        os.makedirs(folderpath)
     target_weights = config['target_weights']
     target_positions = config['target_positions']
     nb_neurons = config['nb_neurons']
@@ -22,11 +27,13 @@ def run(config, seed):
     noise_magnitude = config['noise_magnitude']
     run_tt_limit = config['run_tt_limit']
     plot_iterates = config['plot_iterates']
+    plot_losses = config['plot_losses_one_run']
 
-    np.random.seed(seed)
-    frac_loss_eval = 0.01         # percentage of steps when the loss is evaluated and the functions are plotted
-    frac_limit_integration = 1e-3    # percentage of steps when the limit network is updated
-    X = np.linspace(0, 1, 1000)   # for plots
+    if seed:
+        np.random.seed(seed)
+    nb_loss_eval = 100              # number of steps when the loss is evaluated and the functions are plotted
+    nb_limit_integration = 1000     # number of steps when the limit network is updated
+    X = np.linspace(0, 1, 1000)     # for plots
 
     # The piecewise constant target is implemented as a NN with eta << 1.
     target = NeuralNetwork(target_weights, target_positions, eta=1e-8)
@@ -38,9 +45,9 @@ def run(config, seed):
 
     nb_steps = int(tmax / (h * epsilon))
     print('Number of steps: {}'.format(nb_steps))
-    interval_loss_eval = int(nb_steps * frac_loss_eval)
-    interval_limit_integration = int(nb_steps * frac_limit_integration)
-    limit_integration_stepsize = tmax * frac_limit_integration    # Euler step size for limit dynamics
+    interval_loss_eval = int(nb_steps / nb_loss_eval)
+    interval_limit_integration = int(nb_steps / nb_limit_integration)
+    limit_integration_stepsize = tmax / nb_limit_integration    # Euler step size for limit dynamics
     sgd_losses = []
     limit_losses = []
     legends = [{'name': 'no_legend', 'print': False},
@@ -92,7 +99,11 @@ def run(config, seed):
         sgd_learner.u -= h * epsilon * grads_u
 
         if run_tt_limit and step % interval_limit_integration == 0:
-            derivatives, distance_to_kink = two_timescale_limit.two_timescale_limit_derivative(limit_learner, target)
+            try:
+                derivatives, distance_to_kink = two_timescale_limit.two_timescale_limit_derivative(limit_learner, target)
+            except two_timescale_limit.BadSubdivision:
+                print('Learner has less than two neurons in a target subdivision at step {}'.format(step))
+                raise two_timescale_limit.BadSubdivision
             for i in range(len(limit_learner.u)):
                 if np.abs(distance_to_kink[i]) < np.abs(limit_integration_stepsize * derivatives[i]):
                     # if the step is greater than the distance to the kink: jump to the kink.
@@ -109,14 +120,90 @@ def run(config, seed):
         
     # Plot loss as a function on the number of steps.
     losses = [sgd_losses] if not run_tt_limit else [sgd_losses, limit_losses]
-    labels = ['SGD'] if not run_tt_limit else ['SGD', 'Two-timescale limit']
-    plots.plot_losses(nb_steps,
-                      losses,
-                      labels,
-                      ylim=[-3e-2, 0.5*np.max(np.abs(target_weights))], # sensical common scale across plots.
-                      show=False,
-                      save=True,
-                      folderpath=folderpath)
+
+    if plot_losses:
+        labels = ['SGD'] if not run_tt_limit else ['SGD', 'Two-timescale limit']
+        plots.plot_losses(nb_steps,
+            np.array([losses]),
+            labels,
+            show=False,
+            save=True,
+            folderpath=folderpath)
 
     print('Experiment time: {0:.0f} seconds'.format(time.time()-start_time))
+    print()
+
+    return nb_steps, losses
+
+
+def run_repeats(config, seed=None, save=True):
+    folderpath = config['folderpath']
+    if folderpath and not os.path.exists(folderpath):
+        os.makedirs(folderpath)
+    n_repeats = config['n_repeats']
+    run_tt_limit = config['run_tt_limit']
+
+    print('Repeating experiment {} times'.format(n_repeats))
+    start_time = time.time()
+
+    if seed:
+        np.random.seed(seed)
+
+    all_losses = []
+    k = 0
+    while k < n_repeats:
+        print('Beginning repeat number {}'.format(k))
+        try:
+            nb_steps, losses = run(config)
+            all_losses.append(losses)
+            k += 1
+        except two_timescale_limit.BadSubdivision:
+            print('Error during the run. Re-running with another random seed.')
+    if save:
+        with open(os.path.join(folderpath, 'losses.pickle'), 'wb') as handle:
+            pickle.dump(all_losses, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    labels = ['SGD'] if not run_tt_limit else ['SGD', 'Two-timescale limit']
+    if save:
+        plots.plot_losses(nb_steps,
+            np.array(all_losses),
+            labels,
+            show=False,
+            save=True,
+            folderpath=folderpath)
+
+    print('Experiment time for all repeats: {0:.0f} seconds'.format(time.time()-start_time))
+    print()
+
+    return all_losses
+
+
+def run_epsilon(config, seed):
+    folderpath = config['folderpath']
+    if folderpath and not os.path.exists(folderpath):
+        os.makedirs(folderpath)
+    epsilons = config['epsilon']
+
+    start_time = time.time()
+
+    np.random.seed(seed)
+
+    all_losses_per_epsilon = []
+    for epsilon in epsilons:
+        print('Starting experiments for epsilon = {0:.2f}'.format(epsilon))
+        local_config = copy.copy(config)
+        local_config['epsilon'] = epsilon
+        all_losses = run_repeats(local_config, save=False)
+        all_losses_per_epsilon.append(all_losses)
+
+    with open(os.path.join(folderpath, 'losses.pickle'), 'wb') as handle:
+        pickle.dump(all_losses_per_epsilon, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    plots.plot_boxplot(epsilons, 
+                       np.array(all_losses_per_epsilon)[:,:,0,-1],  # select SGD loss at last time step
+                       show=False, 
+                       save=True, 
+                       folderpath=folderpath)
+
+    print('Total experiment time: {0:.0f} seconds'.format(time.time()-start_time))
     print()

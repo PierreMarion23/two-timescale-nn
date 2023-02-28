@@ -1,6 +1,10 @@
 import numpy as np
 
 
+class BadSubdivision(ValueError):
+    pass
+
+
 def fast_solution(x, learner, target):
     """Returns the function that solves the perfect fast problem.
     
@@ -50,7 +54,7 @@ def two_timescale_limit_derivative(learner, target):
                                          learner.u <= extended_target_subdivision[k+1]], 
                                         axis=0)
         if np.sum(neurons_in_subdivision) < 2:
-            raise ValueError('learner has less than two neurons in a target subdivision')
+            raise BadSubdivision('Learner has less than two neurons in a target subdivision')
 
     for k in range(len(target.u) - 1):
         # The dummy neuron target.u[0] should not move, hence we start with target.u[1].
