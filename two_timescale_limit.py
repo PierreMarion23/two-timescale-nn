@@ -37,7 +37,7 @@ def fast_solution(x, learner, target):
 
 
 def slow_derivatives(distance_left, distance_right, neuron_weight):
-    """Auxiliary function to implement the computation of derivatives wrt to the neurons' positions"""
+    """Auxiliary function to implement the computation of derivatives wrt to the neurons' positions."""
     return (- (distance_right * neuron_weight / (distance_right + distance_left))**2, 
             (distance_left * neuron_weight / (distance_right + distance_left))**2)
 

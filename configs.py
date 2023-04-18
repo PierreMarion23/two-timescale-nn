@@ -3,7 +3,7 @@ import numpy as np
 
 same_lr_config_paper = {
     'name': 'same-lr-exp',
-    'folderpath': 'figures/same-h-final/same_lr',
+    'folderpath': 'figures/same_lr',
     'target_weights': np.array([1, 4, -4, 2, -2, 4]),
     'target_positions': np.linspace(0.2, 0.8, 5, endpoint=True),
     'nb_neurons': 20,
@@ -20,7 +20,7 @@ same_lr_config_paper = {
 
 tt_config_paper = {
     'name': 'tt-exp',
-    'folderpath': 'figures/same-h-final/tt',
+    'folderpath': 'figures/tt',
     'target_weights': np.array([1, 4, -4, 2, -2, 4]),
     'target_positions': np.linspace(0.2, 0.8, 5, endpoint=True),
     'nb_neurons': 20,
@@ -37,7 +37,7 @@ tt_config_paper = {
 
 tt_config_quick = {
     'name': 'tt-exp-quick',
-    'folderpath': 'figures/same-h-final/tt-quick',
+    'folderpath': 'figures/tt-quick',
     'target_weights': np.array([1, 4, -4, 2, -2, 4]),
     'target_positions': np.linspace(0.2, 0.8, 5, endpoint=True),
     'nb_neurons': 20,
@@ -52,27 +52,9 @@ tt_config_quick = {
 }
 
 
-tt_config_quick_repeats = {
-    'name': 'tt-exp-quick',
-    'folderpath': 'figures/same-h-final/tt-quick-repeats',
-    'target_weights': np.array([1, 4, -4, 2, -2, 4]),
-    'target_positions': np.linspace(0.2, 0.8, 5, endpoint=True),
-    'nb_neurons': 20,
-    'tmax': 0.05,
-    'h': 1e-3,
-    'epsilon' : 2e-5,
-    'eta': 4e-3,
-    'noise_magnitude': 1,
-    'run_tt_limit': True,
-    'plot_iterates': False,
-    'plot_losses_one_run': False,
-    'n_repeats': 20
-}
-
-
 varying_epsilon = {
     'name': 'varying-epsilon',
-    'folderpath': 'figures/same-h-final/varying-epsilon',
+    'folderpath': 'figures/varying-epsilon',
     'target_weights': np.array([1, 4, -4, 2, -2, 4]),
     'target_positions': np.linspace(0.2, 0.8, 5, endpoint=True),
     'nb_neurons': 20,

@@ -29,7 +29,10 @@ def plot_current_iterate(iterate_number, xs, ys, labels, ylim, neuron_positions=
     :param labels: list of labels (should be of the same length than xs)
     :param yim: ylim of the plot
     :param neuron_positions: list of lists of neuron positions
-    :param legend: TODO: describe this
+    :param legend: dictionary indicating how to place the legend. For example
+                  {'print': True, 'parameters': {'loc': 'lower left', 'bbox_to_anchor': (-0.6, 0.27)}}
+                  or
+                  {'print': False}
     :param show: if True, shows the plot
     :param save: if True, saves the plot under 'folderpath/plot{iteration_number}{_leg}.png'
                  where {_leg} is present for plots with legents
@@ -102,6 +105,7 @@ def plot_losses(nb_steps, losses_lists, labels, show=False, save=False, folderpa
 
 
 def plot_boxplot(epsilons, losses_per_epsilon, show=False, save=False, folderpath='', file_prefix='boxplot_epsilon'):
+    """Plots a boxplot with the distribution of losses for each value of epsilon."""
     n_repeats = losses_per_epsilon.shape[1]
     d = {r'$\varepsilon$': epsilons*n_repeats, r'$L_2$ error': list(losses_per_epsilon.T.reshape(-1))}
     df = pd.DataFrame.from_dict(d)

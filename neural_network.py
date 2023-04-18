@@ -3,6 +3,7 @@ import scipy.integrate as integ
 
 
 def sigma(x):
+    """Activation function."""
     return np.minimum(np.maximum((4*(x+0.5)**3), 0), 0.5) + np.minimum(np.maximum((0.5 - 4*(0.5-x)**3), 0), 0.5)
 
 

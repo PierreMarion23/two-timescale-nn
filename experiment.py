@@ -11,6 +11,7 @@ import plots
 
 
 def run(config, seed=None):
+    """Main run function."""
     start_time = time.time()
     print('Beginning experiment {}'.format(config['name']))
 
@@ -136,41 +137,23 @@ def run(config, seed=None):
     return nb_steps, losses
 
 
-def run_repeats(config, seed=None, save=True):
-    folderpath = config['folderpath']
-    if folderpath and not os.path.exists(folderpath):
-        os.makedirs(folderpath)
+def run_repeats(config):
+    """Repeats a certain number of runs."""
     n_repeats = config['n_repeats']
-    run_tt_limit = config['run_tt_limit']
 
     print('Repeating experiment {} times'.format(n_repeats))
     start_time = time.time()
-
-    if seed:
-        np.random.seed(seed)
 
     all_losses = []
     k = 0
     while k < n_repeats:
         print('Beginning repeat number {}'.format(k))
         try:
-            nb_steps, losses = run(config)
+            _, losses = run(config)
             all_losses.append(losses)
             k += 1
         except two_timescale_limit.BadSubdivision:
             print('Error during the run. Re-running with another random seed.')
-    if save:
-        with open(os.path.join(folderpath, 'losses.pickle'), 'wb') as handle:
-            pickle.dump(all_losses, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    labels = ['SGD'] if not run_tt_limit else ['SGD', 'Two-timescale limit']
-    if save:
-        plots.plot_losses(nb_steps,
-            np.array(all_losses),
-            labels,
-            show=False,
-            save=True,
-            folderpath=folderpath)
 
     print('Experiment time for all repeats: {0:.0f} seconds'.format(time.time()-start_time))
     print()
@@ -179,6 +162,7 @@ def run_repeats(config, seed=None, save=True):
 
 
 def run_epsilon(config, seed):
+    """Repeats a certain number of runs for varying values of epsilon."""
     folderpath = config['folderpath']
     if folderpath and not os.path.exists(folderpath):
         os.makedirs(folderpath)
