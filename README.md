@@ -18,10 +18,12 @@ pip3 install -r requirements.txt
 
 ## Reproducing the experiments of the paper
 
-Uncomment the relevant lines in main.py (see comments) and then run
+For the experiments in 1D with piecewise constant functions, uncomment the relevant lines in main.py (see comments) and then run
 
 ```
 python main.py
 ```
 
-The notebook manual_plots_paper.ipynb creates Figures 1, 2 and 6. 
+For the other experiments, see the relevant notebooks. The code is lightweight since we do not need to compare precisely to the two-timescale limit, which is why we created a self-contained notebook for each experiment.
+
+The notebook manual_plots_paper.ipynb creates Figures 1, 2 and 7. 
