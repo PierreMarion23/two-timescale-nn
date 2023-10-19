@@ -16,7 +16,6 @@ if distutils.spawn.find_executable('latex'):
 
 markers = ['', 'o', 'v', 's', '+', 'x']
 loss_markevery = [0, 9, 11, 13, 15, 17]
-plot_markevery = [57, 60, 64, 71]
 
 
 def plot_current_iterate(iterate_number, xs, ys, labels, ylim, neuron_positions=[], legend='', 
@@ -41,7 +40,7 @@ def plot_current_iterate(iterate_number, xs, ys, labels, ylim, neuron_positions=
     if len(xs) != len(ys) or len(xs) != len(labels):
         raise ValueError('lists should have the same length.')
     for k in range(len(xs)):
-        plt.plot(xs[k], ys[k], label=labels[k], marker=markers[k], markevery=plot_markevery[k])
+        plt.plot(xs[k], ys[k], label=labels[k])
     for idx_neuron_batch in range(len(neuron_positions)):
         plt.vlines(neuron_positions[idx_neuron_batch],
                     ymin=ylim[0],
